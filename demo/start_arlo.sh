@@ -20,9 +20,14 @@ sleep 8
 echo "[4/4] navigation and laptop bridge"
 tmux new-window -t arlo -n nav2 "bash -c '$S && ros2 launch ~/nav_arlo_launch.py params_file:=$HOME/nav2_arlo.yaml use_sim_time:=false; exec bash'"
 tmux new-window -t arlo -n fox "bash -c '$S && ros2 launch foxglove_bridge foxglove_bridge_launch.xml port:=8765; exec bash'"
-echo "waiting 75 s for navigation to start..."
-sleep 75
-grep -q "arlo_motor ready" ~/motor.log && echo "motors: OK" || echo "motors: NOT READY (see ~/motor.log)"
+echo "waiting for navigation to start (up to 4 minutes)..."
 source /opt/ros/humble/setup.bash
-echo "navigation: $(ros2 lifecycle get /bt_navigator 2>&1)"
+NAV="not started"
+for i in $(seq 1 24); do
+  sleep 10
+  NAV=$(ros2 lifecycle get /bt_navigator 2>&1)
+  case "$NAV" in active*) break;; esac
+done
+grep -q "arlo_motor ready" ~/motor.log && echo "motors: OK" || echo "motors: NOT READY (see ~/motor.log)"
+echo "navigation: $NAV"
 echo "Done. Connect Foxglove to ws://100.80.54.31:8765"
