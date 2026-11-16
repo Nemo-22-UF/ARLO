@@ -39,7 +39,7 @@ Then:
 ~/start_arlo.sh
 ```
 
-Enter the password when it asks. After about 2 minutes it should print:
+Enter the password when it asks. After 2 to 4 minutes (longer right after a fresh boot) it should print:
 
 ```
 motors: OK
@@ -82,6 +82,8 @@ Click on that terminal, then **hold** a key to drive:
 
 Releasing the key stops the robot within half a second. Drive slowly around the area and the map fills in on the laptop. Press `Ctrl+C` to quit.
 
+Do not press `q`, `w`, or `e`. They raise the speed setting. If that happens, quit with `Ctrl+C` and run the command again.
+
 ## 5. Demo B: drive to a goal by itself (test first)
 
 Only with at least half a meter of free space around the robot.
@@ -112,7 +114,8 @@ Wait for the lights to settle, then unplug.
 |---|---|
 | Robot does anything unexpected | Flip the motor power switch. |
 | `motors: NOT READY` | Run `cat ~/motor.log` to see the error, then run `~/start_arlo.sh` again. |
-| Keys pressed but the robot does not move | Check the motor power switch. Check `tail ~/motor.log` shows `L ... R ...` lines while you hold a key. |
+| Keys pressed but the robot does not move | Check the motor power switch. Run `tail ~/motor.log`. If it shows `L ... R ...` lines while you hold a key, the commands arrive and the motor side has locked up: turn the motor switch off, wait 5 seconds, turn it on. If that does not help, do a full reset: `sudo shutdown now`, unplug the Kria, switch the motors off, wait 10 seconds, power everything back on, and run `~/start_arlo.sh` again. This happened once on Nov 16 and the full reset fixed it. |
+| `navigation:` line does not say `active` | Keyboard driving still works. Wait a minute and check with `ros2 lifecycle get /bt_navigator`, or run `~/start_arlo.sh` again. |
 | Map is frozen or the robot jumps around on it | Run `~/start_arlo.sh` again. It restarts everything cleanly. |
 | Foxglove cannot connect | Check the laptop can reach the Kria (`ping 100.80.54.31`). Check Tailscale is on and signed in. |
 | A goal is sent but the robot stays still | The robot or the goal is too close to an obstacle. Move it to open floor and try a goal on white space. |
