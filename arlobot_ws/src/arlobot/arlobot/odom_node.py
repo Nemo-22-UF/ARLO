@@ -11,12 +11,14 @@ import math
 import time
 
 # === Constants ===
-WHEEL_DIAMETER = 0.1524  # meters
-WHEEL_BASE = 0.3937      # meters
-COUNTS_PER_REV = 144
+WHEEL_DIAMETER = 0.1524  # meters 0.1524
+WHEEL_BASE = 0.3875     # meters 0.3937 
+COUNTS_PER_REV_L = 35
+COUNTS_PER_REV_R = 35
 WHEEL_CIRCUMFERENCE = math.pi * WHEEL_DIAMETER
-DISTANCE_PER_TICK = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV
-
+DISTANCE_PER_TICK_L = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV_L
+DISTANCE_PER_TICK_R = WHEEL_CIRCUMFERENCE / COUNTS_PER_REV_R
+#DISTANCE_PER_TICK = 0.0137
 class OdomNode(Node):
     def __init__(self):
         super().__init__('odom_node')
@@ -43,16 +45,16 @@ class OdomNode(Node):
         self.right_ticks = msg.data
 
     def update_odom(self):
-        delta_left = self.left_ticks - self.last_left
-        delta_right = self.right_ticks - self.last_right
+        delta_left = (self.left_ticks - self.last_left)
+        delta_right = -(self.right_ticks - self.last_right)
 
         self.last_left = self.left_ticks
         self.last_right = self.right_ticks
 
-        d_left = delta_left * DISTANCE_PER_TICK
-        d_right = delta_right * DISTANCE_PER_TICK
+        d_left = delta_left * DISTANCE_PER_TICK_L
+        d_right = delta_right * DISTANCE_PER_TICK_R
         d_center = (d_left + d_right) / 2.0
-        delta_theta = (d_right - d_left) / WHEEL_BASE
+        delta_theta = (d_left - d_right) / WHEEL_BASE
 
         self.theta += delta_theta
         self.x += d_center * math.cos(self.theta)
